@@ -114,7 +114,15 @@ Now we have a Cortex running in Kubernetes in the port 80. You can check it by r
 curl "http://$(minikube ip)/index.html"
 ```
 
-If you want to check it in the browser and you are not in the same machine in which the minikube is running you will need to forward the minikube ip traffic to the ip of the machine. You can do this using the following command:
+To enter to the Cortex Platform in the browser you can use the following command to retrieve the ip of the minikube cluster:
+
+```bash
+minikube ip
+```
+
+And then go to your browser and search ```http://<minikube-ip>```
+
+If you want to check it in the browser and you are not in the same machine in which the minikube cluster is running you will need to forward the minikube traffic to the host machine. You can do this running the following command:
 
 ```bash
 sudo ssh -fN -g -L 80:$(minikube ip):80 <ssh-user>@<machine-ip>
