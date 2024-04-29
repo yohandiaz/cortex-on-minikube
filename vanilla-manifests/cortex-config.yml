@@ -4,4 +4,5 @@ metadata:
   name: cortex-config
   namespace: cortex
 data:
-  job_directory: "/tmp/cortex-jobs"
+  es-hostname: "elasticsearch"
+  es-uri: "http://elasticsearch:9200"

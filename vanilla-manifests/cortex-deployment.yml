@@ -27,23 +27,26 @@ spec:
             memory: 750Mi
         env:
         - name: job_directory
+          value: "/tmp/cortex-jobs"
+        - name: es-hostname
           valueFrom:
             configMapKeyRef:
               name: cortex-config
-              key: job_directory
+              key: es-hostname
+        - name: es-uri
+          valueFrom:
+            configMapKeyRef:
+              name: cortex-config
+              key: es-uri
         volumeMounts:
         - name: docker-sock
           mountPath: /var/run/docker.sock
         - name: job-volume
-          mountPath: /etc/cortex/job
+          mountPath: /tmp/cortex-jobs
       volumes:
       - name: docker-sock
         hostPath:
           path: /var/run/docker.sock
           type: Socket
       - name: job-volume
-        configMap:
-          name: cortex-config
-          items:
-          - key: job_directory
-            path: job_directory
+        path: /var/run/cortex-jobs
