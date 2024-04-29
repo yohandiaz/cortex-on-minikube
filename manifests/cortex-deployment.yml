@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cortex
+  namespace: cortex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cortex
+  template:
+    metadata:
+      labels:
+        app: cortex
+    spec:
+      containers:
+      - name: cortex
+        image: thehiveproject/cortex:3.1.8
+        ports:
+        - containerPort: 9001
+        resources:
+          limits:
+            cpu: "500m"
+            memory: 1000Mi
+          requests:
+            cpu: "500m"
+            memory: 750Mi
+        env:
+        - name: job_directory
+          valueFrom:
+            configMapKeyRef:
+              name: cortex-config
+              key: job_directory
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: job-volume
+          mountPath: /etc/cortex/job
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: job-volume
+        configMap:
+          name: cortex-config
+          items:
+          - key: job_directory
+            path: job_directory

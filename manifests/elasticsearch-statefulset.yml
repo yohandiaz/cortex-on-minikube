@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: cortex
+spec:
+  serviceName: elasticsearch
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:7.17.20
+        ports:
+        - containerPort: 9200
+        resources:
+            limits:
+              cpu: "500m"
+              memory: 1500Mi
+            requests:
+              cpu: "500m"
+              memory: 1000Mi
+        env:
+        - name: http.host
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: http.host
+        - name: discovery.type
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: discovery.type
+        - name: script.allowed_types
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: script.allowed_types
+        - name: thread_pool.search.queue_size
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: thread_pool.search.queue_size
+        - name: thread_pool.write.queue_size
+          valueFrom:
+            configMapKeyRef:
+              name: elasticsearch-config
+              key: thread_pool.write.queue_size
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+  - metadata:
+      name: elasticsearch-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-config
+  namespace: cortex
+data:
+  http.host: "0.0.0.0"
+  discovery.type: "single-node"
+  script.allowed_types: "inline"
+  thread_pool.search.queue_size: "100000"
+  thread_pool.write.queue_size: "10000"
