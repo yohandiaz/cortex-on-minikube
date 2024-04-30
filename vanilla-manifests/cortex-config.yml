@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cortex-config
-  namespace: cortex
-data:
-  es-hostname: "elasticsearch"
-  es-uri: "http://elasticsearch:9200"
