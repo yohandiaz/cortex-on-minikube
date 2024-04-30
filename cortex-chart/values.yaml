@@ -20,6 +20,7 @@ cortex:
     uri: "http://elasticsearch:9200"
   pvc:
     jobDataPvcName: "cortex-job-data-pvc"
+    storageSize: "10Gi"
 
 elasticsearch:
   image: elasticsearch:7.17.20
