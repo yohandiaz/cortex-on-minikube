@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-config
+  namespace: {{ .Values.namespace }}
+data:
+  http.host: "{{ .Values.elasticsearch.config.http_host }}"
+  discovery.type: "{{ .Values.elasticsearch.config.discovery_type }}"
+  script.allowed_types: "{{ .Values.elasticsearch.config.script_allowed_types }}"
+  thread_pool.search.queue_size: "{{ .Values.elasticsearch.config.thread_pool_search_queue_size }}"
+  thread_pool.write.queue_size: "{{ .Values.elasticsearch.config.thread_pool_write_queue_size }}"

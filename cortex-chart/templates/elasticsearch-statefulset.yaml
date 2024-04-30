@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: elasticsearch
+  replicas: {{ .Values.elasticsearch.replicaCount }}
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: {{ .Values.elasticsearch.image }}
+        ports:
+        - containerPort: {{ .Values.elasticsearch.port }}
+        resources:
+          {{ toYaml .Values.elasticsearch.resources | nindent 10 }}
+        env:
+        - name: http.host
+          value: "{{ .Values.elasticsearch.config.http_host }}"
+        - name: discovery.type
+          value: "{{ .Values.elasticsearch.config.discovery_type }}"
+        - name: script.allowed_types
+          value: "{{ .Values.elasticsearch.config.script_allowed_types }}"
+        - name: thread_pool.search.queue_size
+          value: "{{ .Values.elasticsearch.config.thread_pool_search_queue_size }}"
+        - name: thread_pool.write.queue_size
+          value: "{{ .Values.elasticsearch.config.thread_pool_write_queue_size }}"
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: {{ .Values.elasticsearch.volumeMounts.mountPath }}
+        readinessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: {{ .Values.elasticsearch.port }}
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: elasticsearch-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: "{{ .Values.elasticsearch.volumeClaimTemplates.storage }}"

@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cortex
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.cortex.replicaCount }}
+  selector:
+    matchLabels:
+      app: cortex
+  template:
+    metadata:
+      labels:
+        app: cortex
+    spec:
+      containers:
+      - name: cortex
+        image: {{ .Values.cortex.image }}
+        ports:
+        - containerPort: {{ .Values.cortex.port }}
+        resources:
+          {{ toYaml .Values.cortex.resources | nindent 10 }}
+        env:
+        - name: job_directory
+          value: {{ .Values.cortex.job_directory }}
+        - name: es-hostname
+          value: {{ .Values.cortex.elasticsearch.hostname }}
+        - name: es-uri
+          value: {{ .Values.cortex.elasticsearch.uri }}
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: job-volume
+          mountPath: {{ .Values.cortex.job_directory }}
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: job-volume
+        persistentVolumeClaim:
+          claimName: {{ .Values.cortex.pvc.jobDataPvcName }}
