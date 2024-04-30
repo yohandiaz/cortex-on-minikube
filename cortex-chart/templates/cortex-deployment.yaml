@@ -32,6 +32,8 @@ spec:
           mountPath: /var/run/docker.sock
         - name: job-volume
           mountPath: {{ .Values.cortex.job_directory }}
+        readinessProbe:
+          {{ toYaml .Values.cortex.readinessProbe | nindent 10 }}
       volumes:
       - name: docker-sock
         hostPath:

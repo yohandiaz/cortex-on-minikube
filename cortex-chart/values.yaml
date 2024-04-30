@@ -21,6 +21,16 @@ cortex:
   pvc:
     jobDataPvcName: "cortex-job-data-pvc"
     storageSize: "10Gi"
+  readinessProbe:
+    httpGet:
+      path: /api/status
+      port: 9001
+      scheme: HTTP
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
 
 elasticsearch:
   image: elasticsearch:7.17.20
@@ -32,10 +42,10 @@ elasticsearch:
   resources:
     limits:
       cpu: "500m"
-      memory: "1500Mi"
+      memory: "2Gi"
     requests:
       cpu: "500m"
-      memory: "1000Mi"
+      memory: "1Gi"
   volumeMounts:
     mountPath: /usr/share/elasticsearch/data
   volumeClaimTemplates:
@@ -46,4 +56,12 @@ elasticsearch:
     script_allowed_types: "inline"
     thread_pool_search_queue_size: "100000"
     thread_pool_write_queue_size: "10000"
-  
+  readinessProbe:
+    httpGet:
+      path: /_cluster/health
+      port: 9200
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 5
