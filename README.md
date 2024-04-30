@@ -1,32 +1,36 @@
+![cortex_banner](./repo_banner.png)
+
 # Cortex Deployment on Minikube
+
+This guide will walk you through deploying the Cortex analysis platform along with Elasticsearch on a local single node Minikube cluster.
 
 ## Prerequisites
 
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/):
-- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/):
-- [Docker](https://docs.docker.com/engine/install/)
+Before starting, ensure you have the following tools installed on your system:
 
-We will be using the Docker driver for Minikube in this project but you can use another one from this list of [Drivers](https://minikube.sigs.k8s.io/docs/drivers/)
+- **Minikube**: [Installation Guide](https://minikube.sigs.k8s.io/docs/start/)
+  - We will use the Docker driver, but other [Drivers](https://minikube.sigs.k8s.io/docs/drivers/) are also supported.
+- **Kubectl**: [Installation Guide for Linux](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+- **Docker**: [Installation Guide](https://docs.docker.com/engine/install/)
+- **Helm**: [Installation Guide](https://helm.sh/docs/intro/install/)
 
-You can use the automated installation or follow the installation steps given.
+## Automated Prerequisites Installation (Ubuntu/Debian)
 
-## Prerequisites Automated Installation
-
-Remember to examine scripts downloaded from the internet before running them locally.
+To automate the installation of the prerequisites, you can use the provided script. Remember to review scripts before executing them:
 
 ```bash
 cd cortex-on-minikube
 
-# Examine script
+# Review the installation script
 cat install_dependencies.sh
 
-# Execute script after examination
+# Execute script after reviewing it
 sudo ./install_dependencies.sh
 ```
 
-## Prerequisites Installation Steps (Ubuntu/Debian)
+## Manual Installation Steps (Ubuntu/Debian)
 
-If you have used the Automated Installation you can skip this steps.
+If you prefer manual installation or have not used the automated script, follow these steps:
 
 ### Installing Kubectl:
 
@@ -69,63 +73,65 @@ sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-Now all the prerequisites have been installed.
+### Installing Helm:
+
+```bash
+# Download and Install Helm
+curl -LO https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz
+tar -zxvf helm-v3.14.4-linux-amd64.tar.gz
+mv linux-amd64/helm /usr/local/bin/helm
+
+# Cleanup the downloaded files
+rm -rf linux-amd64 helm-v3.14.4-linux-amd64.tar.gz
+```
 
 ## Getting Started
 
-To start the minikube cluster with the Docker driver and 4096mb of RAM run the following commands:
+### Start Minikube
+
+Start your Minikube cluster using Docker as the driver and allocate sufficient resources:
 
 ```bash
 # Starting the minikube cluster
 minikube start --driver=docker --cpus 2 --memory 4096
 ```
 
-Then, to deploy the Cortex and Elasticsearch services run the following commands:
+### Deploy Cortex and Elasticsearch
+
+Enable necessary Minikube addons and deploy the services using Helm:
 
 ```bash
 # Enabling ingress controller
 minikube addons enable ingress
 
-# Creating namespace cortex
-kubectl apply -f manifests/cortex-namespace.yml
+# Deploying with Helm
+helm install cortex ./cortex-chart
 
-# Changing default namespace to cortex
-kubectl config set-context --current --namespace cortex
-
-# Deploying config maps
-kubectl apply -f manifests/cortex-config.yml
-kubectl apply -f manifests/elasticsearch-config.yml
-
-# Deploying network services:
-kubectl apply -f manifests/cortex-service.yml
-kubectl apply -f manifests/cortex-ingress.yml
-kubectl apply -f manifests/elasticsearch-service.yml
-
-# Depploying Elasticsearch statefulset
-kubectl apply -f manifests/elasticsearch-statefulset.yml
-
-# Deploying Cortex
-kubectl apply -f manifests/cortex-deployment.yml
+# Check the deployment
+kubectl get all -n cortex
 ```
 
-Now we have a Cortex running in Kubernetes in the port 80. You can check it by running the following command:
+### Acess Cortex
+
+After deployment, access Cortex using the following steps:
 
 ```bash
-curl "http://$(minikube ip)/index.html"
+# Retrieve the Minikube IP
+MINIKUBE_IP=$(minikube ip)
+
+# Get the index.html to check it is accesible
+curl "http://$MINIKUBE_IP/index.html"
 ```
 
-To enter to the Cortex Platform in the browser you can use the following command to retrieve the ip of the minikube cluster:
+For direct browser access, navigate to ```http://<minikube-ip>``` in your web browser.
+
+### SSH Port Forwarding (Optional)
+
+If accessing from a different machine, set up SSH port forwarding:
 
 ```bash
-minikube ip
+# Replace <ssh-user> and <machine-ip> with your details
+sudo ssh -fN -g -L 80:${MINIKUBE_IP}:80 <ssh-user>@<machine-ip>
 ```
 
-And then go to your browser and search ```http://<minikube-ip>```
-
-If you want to check it in the browser and you are not in the same machine in which the minikube cluster is running you will need to forward the minikube traffic to the host machine. You can do this running the following command:
-
-```bash
-sudo ssh -fN -g -L 80:$(minikube ip):80 <ssh-user>@<machine-ip>
-```
-
-Then you can go to your browser and search for: ```http://<machine-ip>``` to access the Cortex platform.
+Navigate to ```http://<machine-ip>``` in your web browser to access the Cortex platform.
