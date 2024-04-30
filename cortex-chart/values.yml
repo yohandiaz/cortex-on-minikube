@@ -1,0 +1,48 @@
+namespace: cortex
+
+cortex:
+  image: thehiveproject/cortex:3.1.8
+  replicaCount: 1
+  port: 9001
+  service:
+    port: 9001
+    nodePort: 30001
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1000Mi"
+    requests:
+      cpu: "500m"
+      memory: "750Mi"
+  job_directory: "/tmp/cortex-jobs"
+  elasticsearch:
+    hostname: "elasticsearch"
+    uri: "http://elasticsearch:9200"
+  pvc:
+    jobDataPvcName: "cortex-job-data-pvc"
+
+elasticsearch:
+  image: elasticsearch:7.17.20
+  replicaCount: 1
+  port: 9200
+  service:
+    port: 9200
+    targetPort: 9200
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1500Mi"
+    requests:
+      cpu: "500m"
+      memory: "1000Mi"
+  volumeMounts:
+    mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+    storage: 10Gi
+  config:
+    http_host: "0.0.0.0"
+    discovery_type: "single-node"
+    script_allowed_types: "inline"
+    thread_pool_search_queue_size: "100000"
+    thread_pool_write_queue_size: "10000"
+  
