@@ -147,6 +147,8 @@ sudo ssh -fN -g -L 80:${MINIKUBE_IP}:80 <ssh-user>@<machine-ip>
 
 Navigate to ```http://<machine-ip>``` in your web browser to access the Cortex platform.
 
+For further steps in the configuration process of Cortex you can follow the official documentation: [First Start](https://docs.strangebee.com/cortex/user-guides/first-start/)
+
 ## Uninstalling
 
 ### Uninstall Cortex deployment
