@@ -36,12 +36,7 @@ spec:
         - name: elasticsearch-data
           mountPath: {{ .Values.elasticsearch.volumeMounts.mountPath }}
         readinessProbe:
-          httpGet:
-            path: /_cluster/health
-            port: {{ .Values.elasticsearch.port }}
-          initialDelaySeconds: 20
-          periodSeconds: 10
-          timeoutSeconds: 5
+          {{ toYaml .Values.elasticsearch.readinessProbe | nindent 10 }}
   volumeClaimTemplates:
   - metadata:
       name: elasticsearch-data
