@@ -35,8 +35,9 @@ rm /etc/apt/keyrings/docker.asc
 
 # Check docker, minikube and kubectl are removed
 if [[ -x "$(command -v docker)" || -x "$(command -v kubectl)" || -x "$(command -v minikube)" || -x "$(command -v helm)" ]]; then
-    # Echo in red
-    echo -e "Failed to remove dependencies. Check for errors above. Exiting..."
+    # Echo error message in red
+    echo -e "\033[1;31mFailed to remove dependencies. Check for errors above. Exiting...\033[0m"
 else
-    echo "Dependencies removed successfully!"
+    # Echo success message in green
+    echo -e "\033[1;32mDependencies removed successfully!\033[0m"
 fi

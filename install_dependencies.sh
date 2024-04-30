@@ -2,6 +2,7 @@
 
 # Set the environment to noninteractive to suppress prompts
 export DEBIAN_FRONTEND=noninteractive
+export PATH=$PATH:/usr/local/bin
 
 # Check kubectl isn't already installed
 if [[ ! -x "$(command -v kubectl)" ]]; then
@@ -102,5 +103,9 @@ if [[ ! -x "$(command -v helm)" ]]; then
 else
     echo "Helm is already installed. Skipping installation..."
 fi
-# Dependencies installed successfully
-echo -e "Dependencies installed successfully!"
+
+# Dependencies installed successfully message in green
+echo -e "\033[1;32mDependencies installed successfully!\033[0m"
+
+# Tell the user to make sure to add /usr/local/bin to their PATH
+echo -e "\033[1;33mIMPORTANT: To be able to use this dependencies make sure to add /usr/local/bin to your PATH by running:\033[0m \033[1;32mexport PATH=\$PATH:/usr/local/bin\033[0m"
