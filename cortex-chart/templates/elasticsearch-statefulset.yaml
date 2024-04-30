@@ -23,15 +23,15 @@ spec:
           {{ toYaml .Values.elasticsearch.resources | nindent 10 }}
         env:
         - name: http.host
-          value: {{ .Values.elasticsearch.config.http_host }}
+          value: "{{ .Values.elasticsearch.config.http_host }}"
         - name: discovery.type
-          value: {{ .Values.elasticsearch.config.discovery_type }}
+          value: "{{ .Values.elasticsearch.config.discovery_type }}"
         - name: script.allowed_types
-          value: {{ .Values.elasticsearch.config.script_allowed_types }}
+          value: "{{ .Values.elasticsearch.config.script_allowed_types }}"
         - name: thread_pool.search.queue_size
-          value: {{ .Values.elasticsearch.config.thread_pool_search_queue_size }}
+          value: "{{ .Values.elasticsearch.config.thread_pool_search_queue_size }}"
         - name: thread_pool.write.queue_size
-          value: {{ .Values.elasticsearch.config.thread_pool_write_queue_size }}
+          value: "{{ .Values.elasticsearch.config.thread_pool_write_queue_size }}"
         volumeMounts:
         - name: elasticsearch-data
           mountPath: {{ .Values.elasticsearch.volumeMounts.mountPath }}
@@ -49,4 +49,4 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: {{ .Values.elasticsearch.volumeClaimTemplates.storage }}
+          storage: "{{ .Values.elasticsearch.volumeClaimTemplates.storage }}"
