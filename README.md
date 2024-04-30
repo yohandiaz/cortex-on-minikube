@@ -37,7 +37,7 @@ If you prefer manual installation or have not used the automated script, follow 
 ```bash
 # Download and Install Kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl
 ```
 
 ### Installing Minikube:
@@ -70,7 +70,7 @@ echo \
 sudo apt-get update
 
 # Install the latest docker version
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 ### Installing Helm:
@@ -79,7 +79,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 # Download and Install Helm
 curl -LO https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz
 tar -zxvf helm-v3.14.4-linux-amd64.tar.gz
-mv linux-amd64/helm /usr/local/bin/helm
+sudo mv linux-amd64/helm /usr/local/bin/helm
 
 # Cleanup the downloaded files
 rm -rf linux-amd64 helm-v3.14.4-linux-amd64.tar.gz
@@ -103,11 +103,22 @@ Enable necessary Minikube addons and deploy the services using Helm:
 ```bash
 # Enabling ingress controller
 minikube addons enable ingress
+```
 
-# Deploying with Helm
+Wait for the ingress controller to be ready before deploying the services with Helm, you can check if it is ready by running the following command:
+
+```bash
+# Get pods in ingress-nginx namespace
+kubectl get pods -n ingress-nginx
+```
+
+Once the ingress controller is ready, you can deploy the Cortex services with Helm:
+
+```bash
+# Deploying Helm
 helm install cortex ./cortex-chart
 
-# Check the deployment
+# Check the deployment in the namespace cortex
 kubectl get all -n cortex
 ```
 
@@ -135,3 +146,35 @@ sudo ssh -fN -g -L 80:${MINIKUBE_IP}:80 <ssh-user>@<machine-ip>
 ```
 
 Navigate to ```http://<machine-ip>``` in your web browser to access the Cortex platform.
+
+## Uninstalling
+
+### Uninstall Cortex deployment
+
+To remove the Cortex deployment from your Minikube cluster, use the following Helm command:
+
+```bash
+# Delete the Helm deployment
+helm uninstall cortex
+```
+
+### Stop Minikube
+
+Once you have uninstalled the deployment, you can stop Minikube:
+
+```bash
+# Stop the Minikube cluster
+minikube stop
+```
+
+### Remove Dependencies (Optional)
+
+If you want to remove all installed dependencies (Docker, Kubectl, Helm, and Minikube), you can run the provided script. Remember to carefully review each script before executing to ensure it performs actions that are safe and intended for your environment.
+
+```bash
+# Review the dependencies removal script
+cat remove_dependencies.sh
+
+# Execute the script after reviewing
+sudo ./remove_dependencies.sh
+```
