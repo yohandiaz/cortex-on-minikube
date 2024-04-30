@@ -21,9 +21,6 @@ To automate the installation of the prerequisites, you can use the provided scri
 ```bash
 cd cortex-on-minikube
 
-# Review the installation script
-cat install_dependencies.sh
-
 # Execute script after reviewing it
 sudo ./install_dependencies.sh
 ```
