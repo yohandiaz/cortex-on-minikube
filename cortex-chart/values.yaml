@@ -113,4 +113,8 @@ elasticsearch:
 
 
 ingress:
+  name: cortex-ingress
   namespace: ingress-nginx
+  whitelistSourceRange: "10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12, 169.254.0.0/16, 127.0.0.1" # Allowing private IP ranges adapt for your use case
+  path: /
+  pathType: Prefix

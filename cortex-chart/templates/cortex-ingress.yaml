@@ -1,14 +1,16 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cortex-ingress
+  name: {{ .Values.ingress.name }}
   namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ .Values.ingress.whitelistSourceRange }}
 spec:
   rules:
   - http:
       paths:
-      - path: /
-        pathType: Prefix
+      - path: {{ .Values.ingress.path }}
+        pathType: {{ .Values.ingress.pathType }}
         backend:
           service:
             name: {{ .Values.cortex.name }}
