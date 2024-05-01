@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cortex-network-policy
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.cortex.matchLabels.app }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app: {{ .Values.cortex.matchLabels.app }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.cortex.port }}
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            app.kubernetes.io/name: {{ .Values.ingress.namespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.cortex.port }}

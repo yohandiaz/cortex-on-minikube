@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: elasticsearch
+  name: {{ .Values.elasticsearch.name }}
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-    - port: {{ .Values.elasticsearch.service.port }}
-      targetPort: {{ .Values.elasticsearch.service.targetPort }}
+    - port: {{ .Values.elasticsearch.port }}
+      targetPort: {{ .Values.elasticsearch.port }}
   selector:
-    app: elasticsearch
+    app: {{ .Values.elasticsearch.matchLabels.app }}

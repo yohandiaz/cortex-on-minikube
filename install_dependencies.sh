@@ -4,6 +4,9 @@
 export DEBIAN_FRONTEND=noninteractive
 export PATH=$PATH:/usr/local/bin
 
+# Install packages
+apt-get install -y curl
+
 # Check kubectl isn't already installed
 if [[ ! -x "$(command -v kubectl)" ]]; then
     echo "Kubectl is not installed. Proceeding with installation..."

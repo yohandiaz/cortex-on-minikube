@@ -1,52 +1,43 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: elasticsearch
+  name: {{ .Values.elasticsearch.name }}
   namespace: {{ .Values.namespace }}
 spec:
-  serviceName: elasticsearch
+  serviceName: {{ .Values.elasticsearch.name }}
   replicas: {{ .Values.elasticsearch.replicaCount }}
   selector:
     matchLabels:
-      app: elasticsearch
+      app: {{ .Values.elasticsearch.matchLabels.app }}
   template:
     metadata:
       labels:
-        app: elasticsearch
+        app: {{ .Values.elasticsearch.matchLabels.app }}
     spec:
       containers:
-      - name: elasticsearch
+      - name: {{ .Values.elasticsearch.name }}
         image: {{ .Values.elasticsearch.image }}
         ports:
         - containerPort: {{ .Values.elasticsearch.port }}
         resources:
-          {{ toYaml .Values.elasticsearch.resources | nindent 10 }}
-        env:
-        - name: http.host
-          value: "{{ .Values.elasticsearch.config.http_host }}"
-        - name: discovery.type
-          value: "{{ .Values.elasticsearch.config.discovery_type }}"
-        - name: script.allowed_types
-          value: "{{ .Values.elasticsearch.config.script_allowed_types }}"
-        - name: thread_pool.search.queue_size
-          value: "{{ .Values.elasticsearch.config.thread_pool_search_queue_size }}"
-        - name: thread_pool.write.queue_size
-          value: "{{ .Values.elasticsearch.config.thread_pool_write_queue_size }}"
+          {{- toYaml .Values.elasticsearch.resources | nindent 12 }}
+        envFrom:
+        - configMapRef:
+            name: elasticsearch-config
         volumeMounts:
-        - name: elasticsearch-data
-          mountPath: {{ .Values.elasticsearch.volumeMounts.mountPath }}
+          {{- range .Values.elasticsearch.volumeMounts }}
+          - name: {{ .name }}
+            mountPath: {{ .mountPath }}
+          {{- end }}
+        livenessProbe:
+          {{- toYaml .Values.elasticsearch.livenessProbe | nindent 12 }}
         readinessProbe:
-          httpGet:
-            path: /_cluster/health
-            port: {{ .Values.elasticsearch.port }}
-          initialDelaySeconds: 20
-          periodSeconds: 10
-          timeoutSeconds: 5
+          {{- toYaml .Values.elasticsearch.readinessProbe | nindent 12 }}
   volumeClaimTemplates:
   - metadata:
-      name: elasticsearch-data
+      name: {{ .Values.elasticsearch.volumeClaimTemplates.name }}
     spec:
-      accessModes: ["ReadWriteOnce"]
+      accessModes: {{ .Values.elasticsearch.volumeClaimTemplates.accessModes }}
       resources:
         requests:
           storage: "{{ .Values.elasticsearch.volumeClaimTemplates.storage }}"
