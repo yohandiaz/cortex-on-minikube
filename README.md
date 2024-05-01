@@ -19,6 +19,7 @@ Before starting, ensure you have the following tools installed on your system:
 To automate the installation of the prerequisites, you can use the provided script. Remember to review scripts before executing them:
 
 ```bash
+# Change the working directory to the repository
 cd cortex-on-minikube
 
 # Execute script after reviewing it
@@ -114,28 +115,37 @@ Once the ingress controller is ready, you can deploy the Cortex services with He
 ```bash
 # Deploying Helm
 helm install cortex ./cortex-chart
+```
 
-# Check the deployment in the namespace cortex
+Check the deployment in the namespace cortex:
+
+```bash
+# Get elements in cortex namespace
 kubectl get all -n cortex
 ```
 
-### Acess Cortex
+After around a minute all the elements should be runnning.
+
+### Accessing Cortex
 
 After deployment, access Cortex using the following steps:
 
 ```bash
 # Retrieve the Minikube IP
 MINIKUBE_IP=$(minikube ip)
+```
 
-# Get the index.html to check it is accesible
-curl "http://$MINIKUBE_IP/index.html"
+Get the Cortex status by running:
+
+```bash
+curl "http://$MINIKUBE_IP/api/status"
 ```
 
 For direct browser access, navigate to ```http://<minikube-ip>``` in your web browser.
 
 ### SSH Port Forwarding (Optional)
 
-If accessing from a different machine, set up SSH port forwarding:
+If you are accessing from a different machine, set up SSH port forwarding:
 
 ```bash
 # Replace <ssh-user> and <machine-ip> with your details
