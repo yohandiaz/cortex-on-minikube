@@ -23,6 +23,8 @@ cortex:
     value: "elasticsearch"
   - name: es-uri
     value: "http://elasticsearch:9200"
+  - name: docker-job-directory
+    value: "/var/run/cortex/jobs"
   readinessProbe:
     httpGet:
       path: /api/status
@@ -47,17 +49,19 @@ cortex:
     - name: job-volume
       mountPath: "/tmp/cortex-jobs"
     - name: docker-sock
-      mountPath: "/var/run/docker.sock"
+      mountPath: /var/run/docker.sock
   volumes:
     - name: job-volume
-      persistentVolumeClaim:
-        name: "cortex-job-data-pvc"
+      hostPath:
+        path: /var/run/cortex/jobs
+        type: DirectoryOrCreate
     - name: docker-sock
-      type: Socket
-  pvc:
-    name: "cortex-job-data-pvc"
-    storageSize: "5Gi"
-    accessModes: ["ReadWriteMany"]
+      hostPath:
+        # Binding the docker socket is a security risk but it's needed for cortex to run it's jobs
+        # It could be achieved by allowing cortex to run kubernetes jobs, but Cortex doesn't seems to support that.
+        # Needs to be reviewed!!
+        path: /var/run/docker.sock
+        type: Socket
 
 elasticsearch:
   name: elasticsearch
