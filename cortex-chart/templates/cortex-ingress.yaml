@@ -11,6 +11,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: cortex
+            name: {{ .Values.cortex.name }}
             port:
-              number: {{ .Values.cortex.service.port }}
+              number: {{ .Values.cortex.port }}

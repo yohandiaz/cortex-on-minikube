@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cortex
+  name: {{ .Values.cortex.name }}
   namespace: {{ .Values.namespace }}
 spec:
   type: NodePort
   ports:
-  - port: {{ .Values.cortex.service.port }}
-    targetPort: {{ .Values.cortex.service.port }}
-    nodePort: {{ .Values.cortex.service.nodePort }}
+  - port: {{ .Values.cortex.port }}
+    targetPort: {{ .Values.cortex.port }}
+    nodePort: {{ .Values.cortex.nodePort }}
   selector:
     app: cortex

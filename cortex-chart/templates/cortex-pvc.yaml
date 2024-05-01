@@ -1,11 +1,10 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.cortex.pvc.jobDataPvcName }}
+  name: {{ .Values.cortex.pvc.name }}
   namespace: {{ .Values.namespace }}
 spec:
-  accessModes:
-    - "ReadWriteMany"
+  accessModes: {{ .Values.cortex.pvc.accessModes }}
   resources:
     requests:
       storage: {{ .Values.cortex.pvc.storageSize }}
