@@ -8,6 +8,14 @@ This guide will walk you through deploying the Cortex analysis platform along wi
 
 Before starting, ensure you have the following tools installed on your system:
 
+For a smooth operation of Cortex and Elasticsearch on Minikube, the following minimum system resources are recommended:
+
+- **CPU**: At least 2 CPU cores available available to assign to the Minikube cluste.
+- **Memory**: At least 4 GB of RAM available to assign to the Minikube cluster.
+- **Disk Space**: At least 20 GB of free disk space for the Minikube cluster.
+
+### Package dependencies
+
 - **Minikube**: [Installation Guide](https://minikube.sigs.k8s.io/docs/start/)
   - We will use the Docker driver, but other [Drivers](https://minikube.sigs.k8s.io/docs/drivers/) are also supported.
 - **Kubectl**: [Installation Guide for Linux](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
@@ -18,11 +26,15 @@ Before starting, ensure you have the following tools installed on your system:
 
 To automate the installation of the prerequisites, you can use the provided script. Remember to review scripts before executing them:
 
-```bash
-# Change the working directory to the repository
-cd cortex-on-minikube
+Change the working directory to the repository:
 
-# Execute script after reviewing it
+```bash
+cd cortex-on-minikube
+```
+
+Execute the automated installation script:
+
+```bash
 sudo ./install_dependencies.sh
 ```
 
@@ -33,7 +45,6 @@ If you prefer manual installation or have not used the automated script, follow 
 ### Installing Kubectl:
 
 ```bash
-# Download and Install Kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl
 ```
@@ -41,7 +52,6 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubect
 ### Installing Minikube:
 
 ```bash
-# Download and Install Minikube
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
 ```
@@ -74,7 +84,6 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 ### Installing Helm:
 
 ```bash
-# Download and Install Helm
 curl -LO https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz
 tar -zxvf helm-v3.14.4-linux-amd64.tar.gz
 sudo mv linux-amd64/helm /usr/local/bin/helm
@@ -90,37 +99,32 @@ rm -rf linux-amd64 helm-v3.14.4-linux-amd64.tar.gz
 Start your Minikube cluster using Docker as the driver and allocate sufficient resources:
 
 ```bash
-# Starting the minikube cluster
 minikube start --driver=docker --cpus 2 --memory 4096
 ```
 
 ### Deploy Cortex and Elasticsearch
 
-Enable necessary Minikube addons and deploy the services using Helm:
+Enable the ingress nginx controller in the Minikube cluster and deploy the services using Helm:
 
 ```bash
-# Enabling ingress controller
 minikube addons enable ingress
 ```
 
 Wait for the ingress controller to be ready before deploying the services with Helm, you can check if it is ready by running the following command:
 
 ```bash
-# Get pods in ingress-nginx namespace
 kubectl get pods -n ingress-nginx
 ```
 
 Once the ingress controller is ready, you can deploy the Cortex services with Helm:
 
 ```bash
-# Deploying Helm
 helm install cortex ./cortex-chart
 ```
 
 Check the deployment in the namespace cortex:
 
 ```bash
-# Get elements in cortex namespace
 kubectl get all -n cortex
 ```
 
@@ -130,18 +134,19 @@ After around a minute all the elements should be runnning.
 
 After deployment, access Cortex using the following steps:
 
-```bash
-# Retrieve the Minikube IP
-MINIKUBE_IP=$(minikube ip)
-```
-
 Get the Cortex status by running:
 
 ```bash
-curl "http://$MINIKUBE_IP/api/status"
+curl "http://$(minikube ip)/api/status"
 ```
 
 For direct browser access, navigate to ```http://<minikube-ip>``` in your web browser.
+
+Get the minikube ip by running this command:
+
+```bash
+minikube ip
+```
 
 ### SSH Port Forwarding (Optional)
 
@@ -149,7 +154,7 @@ If you are accessing from a different machine, set up SSH port forwarding:
 
 ```bash
 # Replace <ssh-user> and <machine-ip> with your details
-sudo ssh -fN -g -L 80:${MINIKUBE_IP}:80 <ssh-user>@<machine-ip>
+sudo ssh -fN -g -L 80:$(minikube ip):80 <ssh-user>@<machine-ip>
 ```
 
 Navigate to ```http://<machine-ip>``` in your web browser to access the Cortex platform.
@@ -163,7 +168,6 @@ For further steps in the configuration process of Cortex you can follow the offi
 To remove the Cortex deployment from your Minikube cluster, use the following Helm command:
 
 ```bash
-# Delete the Helm deployment
 helm uninstall cortex
 ```
 
@@ -172,7 +176,6 @@ helm uninstall cortex
 Once you have uninstalled the deployment, you can stop Minikube:
 
 ```bash
-# Stop the Minikube cluster
 minikube stop
 ```
 
@@ -181,9 +184,5 @@ minikube stop
 If you want to remove all installed dependencies (Docker, Kubectl, Helm, and Minikube), you can run the provided script. Remember to carefully review each script before executing to ensure it performs actions that are safe and intended for your environment.
 
 ```bash
-# Review the dependencies removal script
-cat remove_dependencies.sh
-
-# Execute the script after reviewing
 sudo ./remove_dependencies.sh
 ```
