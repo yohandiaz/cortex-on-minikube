@@ -22,6 +22,8 @@ spec:
           {{ toYaml .Values.cortex.resources | nindent 10 }}
         env:
           {{ toYaml .Values.cortex.env | nindent 10 }}
+        livenessProbe:
+          {{ toYaml .Values.cortex.livenessProbe | nindent 10 }}
         readinessProbe:
           {{ toYaml .Values.cortex.readinessProbe | nindent 10 }}
         volumeMounts:

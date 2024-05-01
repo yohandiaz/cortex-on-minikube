@@ -29,6 +29,8 @@ spec:
           - name: {{ .name }}
             mountPath: {{ .mountPath }}
           {{- end }}
+        livenessProbe:
+          {{- toYaml .Values.elasticsearch.livenessProbe | nindent 12 }}
         readinessProbe:
           {{- toYaml .Values.elasticsearch.readinessProbe | nindent 12 }}
   volumeClaimTemplates:

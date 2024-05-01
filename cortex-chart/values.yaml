@@ -23,6 +23,11 @@ cortex:
     value: "elasticsearch"
   - name: es-uri
     value: "http://elasticsearch:9200"
+  livenessProbe:
+    tcpSocket:
+      port: 9001
+    initialDelaySeconds: 15
+    periodSeconds: 10
   readinessProbe:
     httpGet:
       path: /api/status
@@ -69,11 +74,18 @@ elasticsearch:
     script_allowed_types: "inline"
     thread_pool_search_queue_size: "100000"
     thread_pool_write_queue_size: "10000"
+  livenessProbe:
+    tcpSocket:
+      port: 9200
+    initialDelaySeconds: 45
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
   readinessProbe:
     httpGet:
       path: /_cluster/health
       port: 9200
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 10
     timeoutSeconds: 10
     successThreshold: 1
