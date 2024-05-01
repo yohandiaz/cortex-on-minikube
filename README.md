@@ -12,7 +12,7 @@ For a smooth operation of Cortex and Elasticsearch on Minikube, the following mi
 
 - **CPU**: At least 2 CPU cores available available to assign to the Minikube cluste.
 - **Memory**: At least 4 GB of RAM available to assign to the Minikube cluster.
-- **Disk Space**: At least 20 GB of free disk space for the Minikube cluster.
+- **Disk Space**: At least 30 GB of free disk space for the Minikube cluster.
 
 ### Package dependencies
 
@@ -102,6 +102,14 @@ Start your Minikube cluster using Docker as the driver and allocate sufficient r
 minikube start --driver=docker --cpus 2 --memory 4096
 ```
 
+You may have an error regarding the user permission to use Docker when running this command, this is solved by running the command:
+
+```bash
+sudo usermod -aG docker $USER && newgrp docker
+```
+
+Then you need to run the minikube start command again.
+
 ### Deploy Cortex and Elasticsearch
 
 Enable the ingress nginx controller in the Minikube cluster and deploy the services using Helm:
@@ -142,19 +150,18 @@ curl "http://$(minikube ip)/api/status"
 
 For direct browser access, navigate to ```http://<minikube-ip>``` in your web browser.
 
-Get the minikube ip by running this command:
+You can get the minikube ip by running this command:
 
 ```bash
 minikube ip
 ```
 
-### SSH Port Forwarding (Optional)
+### Kubectl Port Forwarding (Optional)
 
-If you are accessing from a different machine, set up SSH port forwarding:
+If you are accessing from a different machine, you can set up a Kubectl port forwarding to be able to access from the exterior:
 
 ```bash
-# Replace <ssh-user> and <machine-ip> with your details
-sudo ssh -fN -g -L 80:$(minikube ip):80 <ssh-user>@<machine-ip>
+sudo kubectl port-forward --kubeconfig=/home/$USER/.kube/config -n ingress-nginx --address 0.0.0.0 services/ingress-nginx-controller 80:80
 ```
 
 Navigate to ```http://<machine-ip>``` in your web browser to access the Cortex platform.
