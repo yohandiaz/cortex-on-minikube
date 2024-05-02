@@ -1,0 +1,6 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.waitFirstStorageClass.name }}
+provisioner: {{ .Values.waitFirstStorageClass.provisioner }}
+volumeBindingMode: {{ .Values.waitFirstStorageClass.volumeBindingMode }}
