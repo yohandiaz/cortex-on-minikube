@@ -14,6 +14,13 @@ spec:
       labels:
         app: {{ .Values.elasticsearch.matchLabels.app }}
     spec:
+      initContainers:
+        - name: {{ .Values.elasticsearch.initContainers.name }}
+          image: {{ .Values.elasticsearch.initContainers.image }}
+          command:
+            {{- toYaml .Values.elasticsearch.initContainers.command | nindent 12 }}
+          volumeMounts:
+            {{ toYaml .Values.elasticsearch.volumeMounts | nindent 12 }}
       containers:
       - name: {{ .Values.elasticsearch.name }}
         image: {{ .Values.elasticsearch.image }}
@@ -25,10 +32,7 @@ spec:
         - configMapRef:
             name: elasticsearch-config
         volumeMounts:
-          {{- range .Values.elasticsearch.volumeMounts }}
-          - name: {{ .name }}
-            mountPath: {{ .mountPath }}
-          {{- end }}
+          {{ toYaml .Values.elasticsearch.volumeMounts | nindent 12 }}
         livenessProbe:
           {{- toYaml .Values.elasticsearch.livenessProbe | nindent 12 }}
         readinessProbe:
@@ -41,3 +45,4 @@ spec:
       resources:
         requests:
           storage: "{{ .Values.elasticsearch.volumeClaimTemplates.storage }}"
+      storageClassName: {{ .Values.elasticsearch.volumeClaimTemplates.storageClassName }}

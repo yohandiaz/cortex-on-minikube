@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.elasticSearchOperatorRole.roleBindingName }}
+  namespace: {{ .Values.namespace }}
+subjects:
+- kind: User
+  name: {{ .Values.elasticSearchOperatorRole.roleBindingUser }}
+  apiGroup: {{ .Values.roleBindingApiGroup }}
+roleRef:
+  kind: Role
+  name: {{ .Values.elasticSearchOperatorRole.name }}
+  apiGroup: {{ .Values.roleBindingApiGroup }}

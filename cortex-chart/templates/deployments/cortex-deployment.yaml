@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.cortex.name }}
   namespace: {{ .Values.namespace }}
 spec:
-  replicas: {{ .Values.cortex.replicas.replicaCount }}
+  replicas: {{ .Values.cortex.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Values.cortex.matchLabels.app }}
@@ -29,10 +29,4 @@ spec:
         volumeMounts:
           {{ toYaml .Values.cortex.volumeMounts | nindent 10 }}
       volumes:
-        {{- range .Values.cortex.volumes }}
-        - name: {{ .name }}
-          {{if .persistentVolumeClaim }}
-          persistentVolumeClaim:
-            claimName: {{ .persistentVolumeClaim.name }}
-          {{- end }}
-        {{- end }}
+        {{ toYaml .Values.cortex.volumes | nindent 8 }}

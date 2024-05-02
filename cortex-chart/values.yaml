@@ -4,8 +4,7 @@ cortex:
   name: cortex
   matchLabels:
     app: cortex
-  replicas:
-    replicaCount: 1
+  replicaCount: 1
   image: thehiveproject/cortex:3.1.8
   port: 9001
   nodePort: 30001
@@ -23,12 +22,14 @@ cortex:
     value: "elasticsearch"
   - name: es-uri
     value: "http://elasticsearch:9200"
+  - name: docker-job-directory
+    value: "/var/run/cortex/jobs"
   readinessProbe:
     httpGet:
       path: /api/status
       port: 9001
       scheme: HTTP
-    initialDelaySeconds: 30
+    initialDelaySeconds: 90
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
@@ -38,7 +39,7 @@ cortex:
       path: /api/status
       port: 9001
       scheme: HTTP
-    initialDelaySeconds: 60
+    initialDelaySeconds: 120
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
@@ -47,17 +48,19 @@ cortex:
     - name: job-volume
       mountPath: "/tmp/cortex-jobs"
     - name: docker-sock
-      mountPath: "/var/run/docker.sock"
+      mountPath: /var/run/docker.sock
   volumes:
     - name: job-volume
-      persistentVolumeClaim:
-        name: "cortex-job-data-pvc"
+      hostPath:
+        path: /var/run/cortex/jobs
+        type: DirectoryOrCreate
     - name: docker-sock
-      type: Socket
-  pvc:
-    name: "cortex-job-data-pvc"
-    storageSize: "5Gi"
-    accessModes: ["ReadWriteMany"]
+      hostPath:
+        # Binding the docker socket is a security risk but it's needed for cortex to run it's jobs
+        # It could be achieved by allowing cortex to run kubernetes jobs, but Cortex doesn't seems to support that.
+        # Needs to be reviewed!!
+        path: /var/run/docker.sock
+        type: Socket
 
 elasticsearch:
   name: elasticsearch
@@ -84,19 +87,19 @@ elasticsearch:
       path: /_cluster/health
       port: 9200
       scheme: HTTP
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    timeoutSeconds: 5
+    initialDelaySeconds: 90
+    periodSeconds: 20
+    timeoutSeconds: 10
     successThreshold: 1
-    failureThreshold: 3
+    failureThreshold: 5
   livenessProbe:
     httpGet:
       path: /_cluster/health
       port: 9200
       scheme: HTTP
-    initialDelaySeconds: 60
-    periodSeconds: 10
-    timeoutSeconds: 5
+    initialDelaySeconds: 120
+    periodSeconds: 20
+    timeoutSeconds: 10
     successThreshold: 1
     failureThreshold: 5
   volumeMounts:
@@ -106,7 +109,73 @@ elasticsearch:
     name: elasticsearch-data
     accessModes: ["ReadWriteOnce"]
     storage: "5Gi"
-
+    storageClassName: "wait-first-storage-class"
+  persistentVolume:
+    hostPath: "/usr/share/elasticsearch/data"
+    name: elasticsearch-pv
+    storage: "5Gi"
+    storageClassName: "wait-first-storage-class"
+    accessModes: ["ReadWriteOnce"]
+    volumeMode: "Filesystem"
+    persistentVolumeReclaimPolicy: "Delete"
+  initContainers:
+    name: init
+    image: debian:stable-slim
+    command:
+      - bash
+      - "-c"
+      - "mkdir -p /usr/share/elasticsearch/data && chmod -R 777 /usr/share/elasticsearch/data"
 
 ingress:
+  podName: ingress-nginx-controller
+  name: cortex-ingress
   namespace: ingress-nginx
+  whitelistSourceRange: "10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12, 169.254.0.0/16, 127.0.0.1" # Allowing private IP ranges adapt for your use case
+  path: /
+  pathType: Prefix
+
+waitFirstStorageClass:
+  name: wait-first-storage-class
+  provisioner: k8s.io/minikube-hostpath
+  volumeBindingMode: WaitForFirstConsumer
+
+roleBindingApiGroup: "rbac.authorization.k8s.io"
+
+cortexOperatorRole:
+  name: cortex-operator
+  roleBindingName: cortex-operator-binding
+  roleBindingUser: "username" # Change this to the user you want to bind the role to
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["pods", "deployments", "services", "ingresses", "networkpolicies"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "delete"]
+
+elasticSearchOperatorRole:
+  name: elasticsearch-operator
+  roleBindingName: elasticsearch-operator-binding
+  roleBindingUser: "username" # Change this to the user you want to bind the role to
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["pods", "statefulsets", "services", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+cortexReaderRole:
+  name: cortex-reader
+  roleBindingName: cortex-reader-binding
+  roleBindingUser: "username" # Change this to the user you want to bind the role to
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["pods", "deployments", "services", "ingresses"]
+    verbs: ["get", "list", "watch"]
+
+elasticSearchReaderRole:
+  name: elasticsearch-reader
+  roleBindingName: elasticsearch-reader-binding
+  roleBindingUser: "username" # Change this to the user you want to bind the role to
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["pods", "statefulsets", "services", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
