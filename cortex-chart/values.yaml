@@ -4,8 +4,7 @@ cortex:
   name: cortex
   matchLabels:
     app: cortex
-  replicas:
-    replicaCount: 1
+  replicaCount: 1
   image: thehiveproject/cortex:3.1.8
   port: 9001
   nodePort: 30001
@@ -30,7 +29,7 @@ cortex:
       path: /api/status
       port: 9001
       scheme: HTTP
-    initialDelaySeconds: 30
+    initialDelaySeconds: 90
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
@@ -40,7 +39,7 @@ cortex:
       path: /api/status
       port: 9001
       scheme: HTTP
-    initialDelaySeconds: 60
+    initialDelaySeconds: 120
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
@@ -88,7 +87,7 @@ elasticsearch:
       path: /_cluster/health
       port: 9200
       scheme: HTTP
-    initialDelaySeconds: 60
+    initialDelaySeconds: 120
     periodSeconds: 20
     timeoutSeconds: 10
     successThreshold: 1
@@ -98,11 +97,11 @@ elasticsearch:
       path: /_cluster/health
       port: 9200
       scheme: HTTP
-    initialDelaySeconds: 120
-    periodSeconds: 30
+    initialDelaySeconds: 150
+    periodSeconds: 20
     timeoutSeconds: 10
     successThreshold: 1
-    failureThreshold: 10
+    failureThreshold: 5
   volumeMounts:
     - name: elasticsearch-data
       mountPath: /usr/share/elasticsearch/data
@@ -110,11 +109,32 @@ elasticsearch:
     name: elasticsearch-data
     accessModes: ["ReadWriteOnce"]
     storage: "5Gi"
-
+    storageClassName: "wait-first-storage-class"
+  persistentVolume:
+    hostPath: "/usr/share/elasticsearch/data"
+    name: elasticsearch-pv
+    storage: "5Gi"
+    storageClassName: "wait-first-storage-class"
+    accessModes: ["ReadWriteOnce"]
+    volumeMode: "Filesystem"
+    persistentVolumeReclaimPolicy: "Retain"
+  initContainers:
+    name: init
+    image: debian:stable-slim
+    command:
+      - bash
+      - "-c"
+      - "mkdir -p /usr/share/elasticsearch/data && chmod -R 777 /usr/share/elasticsearch/data"
 
 ingress:
+  podName: ingress-nginx-controller
   name: cortex-ingress
   namespace: ingress-nginx
   whitelistSourceRange: "10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12, 169.254.0.0/16, 127.0.0.1" # Allowing private IP ranges adapt for your use case
   path: /
   pathType: Prefix
+
+waitFirstStorageClass:
+  name: wait-first-storage-class
+  provisioner: k8s.io/minikube-hostpath
+  volumeBindingMode: WaitForFirstConsumer
