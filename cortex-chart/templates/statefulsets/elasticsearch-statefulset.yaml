@@ -25,10 +25,7 @@ spec:
         - configMapRef:
             name: elasticsearch-config
         volumeMounts:
-          {{- range .Values.elasticsearch.volumeMounts }}
-          - name: {{ .name }}
-            mountPath: {{ .mountPath }}
-          {{- end }}
+          {{ toYaml .Values.elasticsearch.volumeMounts | nindent 12 }}
         livenessProbe:
           {{- toYaml .Values.elasticsearch.livenessProbe | nindent 12 }}
         readinessProbe:
@@ -41,3 +38,4 @@ spec:
       resources:
         requests:
           storage: "{{ .Values.elasticsearch.volumeClaimTemplates.storage }}"
+      storageClassName: {{ .Values.elasticsearch.volumeClaimTemplates.storageClassName }}
