@@ -87,7 +87,7 @@ elasticsearch:
       path: /_cluster/health
       port: 9200
       scheme: HTTP
-    initialDelaySeconds: 120
+    initialDelaySeconds: 90
     periodSeconds: 20
     timeoutSeconds: 10
     successThreshold: 1
@@ -97,7 +97,7 @@ elasticsearch:
       path: /_cluster/health
       port: 9200
       scheme: HTTP
-    initialDelaySeconds: 150
+    initialDelaySeconds: 120
     periodSeconds: 20
     timeoutSeconds: 10
     successThreshold: 1
@@ -117,7 +117,7 @@ elasticsearch:
     storageClassName: "wait-first-storage-class"
     accessModes: ["ReadWriteOnce"]
     volumeMode: "Filesystem"
-    persistentVolumeReclaimPolicy: "Retain"
+    persistentVolumeReclaimPolicy: "Delete"
   initContainers:
     name: init
     image: debian:stable-slim
@@ -138,3 +138,44 @@ waitFirstStorageClass:
   name: wait-first-storage-class
   provisioner: k8s.io/minikube-hostpath
   volumeBindingMode: WaitForFirstConsumer
+
+roleBindingApiGroup: "rbac.authorization.k8s.io"
+
+cortexOperatorRole:
+  name: cortex-operator
+  roleBindingName: cortex-operator-binding
+  roleBindingUser: "username" # Change this to the user you want to bind the role to
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["pods", "deployments", "services", "ingresses", "networkpolicies"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "delete"]
+
+elasticSearchOperatorRole:
+  name: elasticsearch-operator
+  roleBindingName: elasticsearch-operator-binding
+  roleBindingUser: "username" # Change this to the user you want to bind the role to
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["pods", "statefulsets", "services", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+cortexReaderRole:
+  name: cortex-reader
+  roleBindingName: cortex-reader-binding
+  roleBindingUser: "username" # Change this to the user you want to bind the role to
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["pods", "deployments", "services", "ingresses"]
+    verbs: ["get", "list", "watch"]
+
+elasticSearchReaderRole:
+  name: elasticsearch-reader
+  roleBindingName: elasticsearch-reader-binding
+  roleBindingUser: "username" # Change this to the user you want to bind the role to
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["pods", "statefulsets", "services", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]

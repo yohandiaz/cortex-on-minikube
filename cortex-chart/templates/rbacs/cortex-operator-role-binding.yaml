@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.cortexOperatorRole.roleBindingName }}
+  namespace: {{ .Values.namespace }}
+subjects:
+- kind: User
+  name: {{ .Values.cortexOperatorRole.roleBindingUser }}
+  apiGroup: {{ .Values.roleBindingApiGroup }}
+roleRef:
+  kind: Role
+  name: {{ .Values.cortexOperatorRole.name }}
+  apiGroup: {{ .Values.roleBindingApiGroup }}

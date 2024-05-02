@@ -1,0 +1,7 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: {{ .Values.cortexReaderRole.name }}
+rules:
+  {{ toYaml .Values.cortexReaderRole.rules | nindent 2}}
