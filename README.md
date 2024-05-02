@@ -130,7 +130,7 @@ Once the ingress controller is ready, you can deploy the Cortex services with He
 helm install cortex ./cortex-chart
 ```
 
-Check the deployment in the namespace cortex:
+Check the deployment in the namespace cortex, it can take around 2 to 3 minutes to be fully deployed:
 
 ```bash
 kubectl get all -n cortex
