@@ -1,0 +1,14 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.elasticsearch.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.elasticsearch.matchLabels.app }}
+  endpoints:
+  - port: "{{ .Values.elasticsearch.port }}"
+    interval: 30s
+{{- end }}

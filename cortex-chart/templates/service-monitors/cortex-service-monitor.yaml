@@ -1,0 +1,14 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.cortex.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.cortex.matchLabels.app }}
+  endpoints:
+  - port: "{{.Values.cortex.port }}"
+    interval: 30s
+{{- end }}
