@@ -99,7 +99,7 @@ rm -rf linux-amd64 helm-v3.14.4-linux-amd64.tar.gz
 Start your Minikube cluster using Docker as the driver and allocate sufficient resources:
 
 ```bash
-minikube start --driver=docker --cpus 2 --memory 4096
+minikube start --driver=docker --cpus 2 --memory 4096 --addons=ingress
 ```
 
 You may have an error regarding the user permission to use Docker when running this command, this is solved by running the command:
@@ -108,26 +108,31 @@ You may have an error regarding the user permission to use Docker when running t
 sudo usermod -aG docker $USER && newgrp docker
 ```
 
-Then you need to run the minikube start command again.
+Then you will need to run the minikube start command again.
 
-### Deploy Cortex and Elasticsearch
+### Deploying Cortex
 
-Enable the ingress nginx controller in the Minikube cluster and deploy the services using Helm:
+#### Deploying Prometheus and Grafana for monitoring (Optional)
 
-```bash
-minikube addons enable ingress
+If you want to deploy the monitoring services Prometheus and Grafana you will need to set the variable monitoring.enabled to true in the cortex-chart/values.yaml file before deploying the Cortex chart. It should look like this:
+
+```yaml
+monitoring:
+  enabled: true # Set to true if you want to deploy Prometheus and Grafana
 ```
 
-Wait for the ingress controller to be ready before deploying the services with Helm, you can check if it is ready by running the following command:
+#### Deploying the Cortex chart
+
+To deploy the Cortex chart you will first need to build the Helm dependencies:
 
 ```bash
-kubectl get pods -n ingress-nginx
+helm dependency build cortex-chart
 ```
 
-Once the ingress controller is ready, you can deploy the Cortex services with Helm:
+Then deploy the Cortex Platform by running:
 
 ```bash
-helm install cortex ./cortex-chart
+helm install cortex cortex-chart
 ```
 
 Check the deployment in the namespace cortex, it can take around 2 to 3 minutes to be fully deployed:
@@ -136,11 +141,9 @@ Check the deployment in the namespace cortex, it can take around 2 to 3 minutes 
 kubectl get all -n cortex
 ```
 
-After around a minute all the elements should be runnning.
-
 ### Accessing Cortex
 
-After deployment, access Cortex using the following steps:
+After ensuring that all the elements are fully deployed, access Cortex using the following steps:
 
 Get the Cortex status by running:
 
@@ -156,7 +159,18 @@ You can get the minikube ip by running this command:
 minikube ip
 ```
 
-### Kubectl Port Forwarding (Optional)
+### Accessing Grafana
+
+For browser access, navigate to ```http://<minikube-ip>:3000``` in your web browser.
+
+Default credentials:
+
+**username**: admin
+***password***: admin
+
+Go to Dashboards to view monitoring stats
+
+### Kubectl Port Forwarding for Cortex (Optional)
 
 If you are accessing from a different machine, you can set up a Kubectl port forwarding to be able to access from the exterior:
 
@@ -167,6 +181,21 @@ sudo kubectl port-forward --kubeconfig=/home/$USER/.kube/config -n ingress-nginx
 Navigate to ```http://<machine-ip>``` in your web browser to access the Cortex platform.
 
 For further steps in the configuration process of Cortex you can follow the official documentation: [First Start](https://docs.strangebee.com/cortex/user-guides/first-start/)
+
+### Kubectl Port Forwarding for Grafana (Optional)
+
+```bash
+sudo kubectl port-forward --kubeconfig=/home/$USER/.kube/config -n default --address 0.0.0.0 service/cortex-grafana 3000:80
+```
+
+Navigate to ```http://<machine-ip>:3000``` in your web browser to access Grafana.
+
+Default credentials:
+
+**username**: admin
+***password***: admin
+
+Go to Dashboards to view monitoring stats
 
 ## Uninstalling
 

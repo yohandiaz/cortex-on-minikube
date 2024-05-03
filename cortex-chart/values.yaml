@@ -1,5 +1,8 @@
 namespace: cortex
 
+monitoring:
+  enabled: false # Set to true if you want to deploy Prometheus and Grafana
+
 cortex:
   name: cortex
   matchLabels:
@@ -14,7 +17,7 @@ cortex:
       memory: "1000Mi"
     requests:
       cpu: "500m"
-      memory: "750Mi"
+      memory: "512Mi"
   env:
   - name: job_directory
     value: "/tmp/cortex-jobs"
@@ -179,3 +182,26 @@ elasticSearchReaderRole:
   - apiGroups: ["", "apps", "networking.k8s.io"]
     resources: ["pods", "statefulsets", "services", "persistentvolumeclaims"]
     verbs: ["get", "list", "watch"]
+
+# Monitoring
+
+kube-prometheus-stack:
+  enabled: true
+  prometheus:
+    prometheusSpec:
+      resources:
+        limits:
+          memory: "1Gi"
+        requests:
+          memory: "512Mi"
+  grafana:
+    enabled: true
+    resources:
+      limits:
+        memory: "512Mi"
+      requests:
+        memory: "256Mi"
+    adminPassword: "admin"
+    service:
+      type: NodePort
+      nodePort: 30002
