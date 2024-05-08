@@ -10,7 +10,7 @@ Before starting, ensure you have the following tools installed on your system:
 
 For a smooth operation of Cortex and Elasticsearch on Minikube, the following minimum system resources are recommended:
 
-- **CPU**: At least 2 CPU cores available available to assign to the Minikube cluste.
+- **CPU**: At least 2 CPU cores available available to assign to the Minikube cluster.
 - **Memory**: At least 4 GB of RAM available to assign to the Minikube cluster.
 - **Disk Space**: At least 30 GB of free disk space for the Minikube cluster.
 
